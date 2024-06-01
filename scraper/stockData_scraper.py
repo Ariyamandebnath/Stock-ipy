@@ -85,6 +85,9 @@ class Index:
             self.create_dict_from_web()
 
     def create_dict_from_csv(self):
+        if not os.path.isfile(self.index_link):
+            print(f"File not found: {self.index_link}")
+            return
         with open(self.index_link) as csv_file:
             read_csv = csv.reader(csv_file, delimiter=',')
             for row in read_csv:
