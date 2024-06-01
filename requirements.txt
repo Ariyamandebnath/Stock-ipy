@@ -1,11 +1,7 @@
 os
 sys
-math
 csv
-time 
-bisect
-urllib2
-string
+time
 requests
 random
-bs4
+BeautifulSoup
