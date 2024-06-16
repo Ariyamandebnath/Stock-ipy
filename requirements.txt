@@ -1,7 +1,3 @@
-os
-sys
-csv
-time
+
 requests
-random
 BeautifulSoup
