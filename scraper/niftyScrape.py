@@ -1,5 +1,4 @@
 import itertools
-from pprint import pprint
 from urllib.parse import urljoin
 from requests import Session
 import click
@@ -175,5 +174,5 @@ def stock_df(symbol, from_date, to_date, series="EQ"):
 if __name__ == "__main__":
     symbol = 'EICHERMOT'
     from_date = datetime.strptime('01-01-2023', '%d-%m-%Y')
-    to_date = datetime.strptime('31-05-2023', '%d-%m-%Y')
+    to_date = datetime.strptime('16-06-2023', '%d-%m-%Y')
     stock_csv(symbol, from_date, to_date, series="EQ", output="../data/historical_stock_data_EicherMotor.csv", show_progress=True)
