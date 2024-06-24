@@ -172,7 +172,7 @@ def stock_df(symbol, from_date, to_date, series="EQ"):
     return df
 
 if __name__ == "__main__":
-    symbol = 'SBIN'
+    symbol = 'HDFCBANK'
     from_date = datetime.strptime('01-01-2021', '%d-%m-%Y')
     to_date = datetime.strptime('24-06-2024', '%d-%m-%Y')
-    stock_csv(symbol, from_date, to_date, series="EQ", output="../data/historical_stock_data_SBIN.csv", show_progress=True)
+    stock_csv(symbol, from_date, to_date, series="EQ", output="../data/historical_stock_data_HDFCBANK.csv", show_progress=True)
