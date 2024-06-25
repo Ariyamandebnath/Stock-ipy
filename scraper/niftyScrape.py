@@ -10,7 +10,6 @@ try:
 except ImportError:
     pd = None
 
-APP_NAME = "nsehistory"
 
 def break_dates(from_date, to_date, delta=timedelta(days=30)):
     """
