@@ -171,7 +171,7 @@ def stock_df(symbol, from_date, to_date, series="EQ"):
     return df
 
 if __name__ == "__main__":
-    symbol = 'AXIS'
+    symbol = 'AXISBANK'
     from_date = datetime.strptime('01-01-2013', '%d-%m-%Y')
     to_date = datetime.strptime('27-06-2024', '%d-%m-%Y')
     stock_csv(symbol, from_date, to_date, series="EQ", output="../data/historical_stock_data_AXIS.csv", show_progress=True)
