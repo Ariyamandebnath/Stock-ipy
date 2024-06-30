@@ -1,3 +1,4 @@
+
 import numpy as np
 import pandas as pd
 import streamlit as st 
@@ -5,11 +6,24 @@ import sys
 import os
 from datetime import datetime, date
 from keras.models import load_model
+from itertools import cycle
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import plotly.express as px
+from plotly.subplots import make_subplots
+import emoji
 
+import seaborn as sns 
+import matplotlib.pyplot as plt 
+from colorama import Fore
 # Add the directory containing niftyScrape.py to the Python path
 sys.path.append(os.path.abspath("/home/ariyaman/learntocode/Stockipy/scraper"))
 
 import niftyScrape
+
+
+
+st.set_page_config(page_title=" StockiPy ",page_icon="🐍")
 
 st.markdown(
     """
@@ -49,11 +63,12 @@ def scrapedData(starting_date, ending_date, stock):
     to_date = datetime.combine(ending_date, datetime.min.time())
     output_path = f"/home/ariyaman/learntocode/Stockipy/data/historical_stock_data_{symbol}.csv"
     
-    # Progress bar initialization
-    progress_bar = st.progress(0)
-
     def progress_callback(progress):
-        progress_bar.progress(progress)
+        with st.spinner("Scraping data ..."):
+            progress_bar = st.progress(0)
+            
+            stock_csv(stock, from_date, to_date, series="EQ", output=output_path,show_progress=True,progress_callback=progress_callback)
+            
     
     # Call the scraping function with progress callback
     niftyScrape.stock_csv(symbol, from_date, to_date, series="EQ", output=output_path, show_progress=True, progress_callback=progress_callback)
@@ -65,3 +80,6 @@ if st.button("Scrape Data"):
     data_path = scrapedData(starting_date, ending_date, stock)
     data = pd.read_csv(data_path)
     st.write(data)
+
+# Show moving averages
+
