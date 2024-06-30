@@ -1,7 +1,6 @@
 import itertools
 from urllib.parse import urljoin
 from requests import Session
-import click
 from datetime import datetime, timedelta
 
 try:
@@ -10,6 +9,7 @@ try:
 except ImportError:
     pd = None
 
+import streamlit as st
 
 def break_dates(from_date, to_date, delta=timedelta(days=30)):
     """
@@ -131,7 +131,7 @@ stock_dtypes = [
     np_int, np_float, np_int, str
 ]
 
-def stock_csv(symbol, from_date, to_date, series="EQ", output="", show_progress=True):
+def stock_csv(symbol, from_date, to_date, series="EQ", output="", show_progress=True, progress_callback=None):
     h = NSEHistory()
     h.show_progress = show_progress
 
@@ -139,11 +139,18 @@ def stock_csv(symbol, from_date, to_date, series="EQ", output="", show_progress=
     params = [(symbol, x[0], x[1], series) for x in reversed(list(date_ranges))]
     
     if show_progress:
-        with click.progressbar(params, label=symbol) as ps:
+        with st.spinner('Scraping data...'):
+            progress_bar = st.progress(0)
+            total_steps = len(params)
+            current_step = 0
+
             chunks = []
-            for p in ps:
-                r = h.stock_raw(*p)
+            for p in params:
+                r = h._stock(*p)
                 chunks.append(r)
+                current_step += 1
+                progress_bar.progress(int(current_step / total_steps * 100))
+            
             raw = list(itertools.chain.from_iterable(chunks))
     else:
         raw = h.stock_raw(symbol, from_date, to_date, series)
@@ -169,9 +176,3 @@ def stock_df(symbol, from_date, to_date, series="EQ"):
     for i, h in enumerate(stock_final_headers):
         df[h] = df[h].apply(stock_dtypes[i])
     return df
-
-if __name__ == "__main__":
-    symbol = 'AXISBANK'
-    from_date = datetime.strptime('01-01-2013', '%d-%m-%Y')
-    to_date = datetime.strptime('27-06-2024', '%d-%m-%Y')
-    stock_csv(symbol, from_date, to_date, series="EQ", output="../data/historical_stock_data_AXIS.csv", show_progress=True)
