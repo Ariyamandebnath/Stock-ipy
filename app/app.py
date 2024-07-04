@@ -131,7 +131,6 @@ scrape = st.button("Scrape Data")
 if scrape:
     path = scrapeData(starting_date, ending_date, stockSymbol)
     data = pd.read_csv(path)
-    st.write(data)
 
     # Data styling
     st.dataframe(data.style.highlight_max(axis=0, color='orange'))
