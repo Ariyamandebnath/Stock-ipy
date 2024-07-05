@@ -15,6 +15,7 @@ st.set_page_config(page_title="Analysis", page_icon="🐍")
 st.markdown(
     """
     <style>
+    <style>
     .stApp {
         background-color: #0E1117;
         color: white;
@@ -117,9 +118,8 @@ option = st.selectbox(
 # Get the corresponding column name and color from the dictionary
 selected_metric, selected_color = options_dict[option]
 
-# Button to trigger plot display
-if st.button('Plot Metric'):
-    plot_stock_metric(stock, selected_metric, selected_color)
+
+plot_stock_metric(stock, selected_metric, selected_color)
 # Function to plot the selected metrics
 def versusGraph(df, x_metric, y_metric, color):
     # Scatter plot for custom metric comparison
@@ -256,22 +256,51 @@ st.markdown("""
 
 Understand how **Weekly Returns** reflect market movements and investment performance. The insightful analysis provides a comprehensive perspective, guiding strategic decisions and maximizing returns.
 """)
+def plot_weekly_returns_line():
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(stock.index, stock['Weekly Return'], linestyle='--', marker='o', color='#3DC2EC', label='Weekly Return')
+    ax.set_xlabel('Date', color='white')
+    ax.set_ylabel('Weekly Return', color='white')
+    ax.set_title('Weekly Returns Line Plot', color='white')
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+    ax.spines['bottom'].set_color('white')
+    ax.spines['left'].set_color('white')
+    legend = ax.legend(facecolor='black', edgecolor='white', loc='upper left')
+    for text in legend.get_texts():
+        text.set_color('white')
+    fig.patch.set_alpha(0)
+    ax.patch.set_alpha(0)
+    st.pyplot(fig)
 
-# Create a Matplotlib figure with specified size and styling
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.plot(stock.index, stock['Weekly Return'], linestyle='--', marker='o', color='#3DC2EC', label='Weekly Return')
-ax.set_xlabel('Date', color='white')
-ax.set_ylabel('Weekly Return', color='white')
-ax.set_title('Weekly Return Plot', color='white')
-ax.tick_params(axis='x', colors='white')
-ax.tick_params(axis='y', colors='white')
-ax.spines['bottom'].set_color('white')
-ax.spines['left'].set_color('white')
-legend = ax.legend(facecolor='black', edgecolor='white', loc='upper left')
-for text in legend.get_texts():
-    text.set_color('white')
-fig.patch.set_alpha(0)
-ax.patch.set_alpha(0)
+# Function to plot the histogram for Weekly Returns
+def plot_weekly_returns_histogram():
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.histplot(stock['Weekly Return'].dropna(), bins=100, color='', ax=ax)
+    ax.set_xlabel('Weekly Return', color='white')
+    ax.set_ylabel('Frequency', color='white')
+    ax.set_title('Distribution of Weekly Returns', color='white')
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+    ax.spines['bottom'].set_color('white')
+    ax.spines['left'].set_color('white')
+    fig.patch.set_alpha(0)
+    ax.patch.set_alpha(0)
+    st.pyplot(fig)
 
-# Display the plot within Streamlit
-st.pyplot(fig)
+
+
+# Option to select plot type
+plot_type = st.selectbox("Select plot type:", ("Weekly Return line plot", "Histogram of Average weekly Return"))
+
+# Display selected plot type
+if plot_type == "Weekly Return line plot":
+    st.markdown("### Weekly Returns Line Plot")
+    st.markdown("Visualizes the weekly returns over time.")
+    plot_weekly_returns_line()
+elif plot_type == "Histogram of Average weekly Return":
+    st.markdown("### Distribution of Weekly Returns")
+    st.markdown("Shows the distribution of average weekly returns.")
+    plot_weekly_returns_histogram()
+    
+    
