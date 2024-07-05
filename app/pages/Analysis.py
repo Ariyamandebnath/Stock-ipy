@@ -3,6 +3,7 @@ import os
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Append the path to your main app for helper functions
 sys.path.append(os.path.abspath("../app.py"))
@@ -25,16 +26,48 @@ st.markdown(
         background-color: #0E1117;
         color: white;
     }
+    .stMarkdown {
+        color: white;
+        text-align: center;
+    }
+    .stMarkdown h1,.stMarkdown h2 {
+        color: #DEF9C4 !important;
+        text-align: center;
+    }
+    
+    .stMarkdown h3 {
+        color: #50B498 !important;
+        text-align: center;
+    }
+    .stTitle {
+        color: #DEF9C4;  /* Title color */
+        font-size: 48px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .stButton button {
+        color: white !important;
+        border-color: white !important;
+        background-color: #3DC2EC;  /* Button background color */
+        transition: all 0.3s ease;
+    }
+    .stButton button:hover {
+        background-color: #FF204E;  /* Button hover background color */
+    }
+    .stButton button:active {
+        transform: scale(0.95);
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
+
+
+
 # Function to get the path of the only file in the directory
 directory_path = '/home/ariyaman/learntocode/Stockipy/data'
 file_path = get_only_file_path(directory_path)
-
-st.markdown("## Enhancing Your Stock Market Insights ##")
 
 # Read the stock data
 stock = pd.read_csv(file_path)
@@ -50,6 +83,7 @@ options_dict = {
 }
 
 # Function to plot the selected metric
+# Function to plot the selected metric
 def plot_stock_metric(df, metric, color):
     fig, ax = plt.subplots(figsize=(12, 4))
     df[metric].plot(ax=ax, color=color)
@@ -64,7 +98,17 @@ def plot_stock_metric(df, metric, color):
     ax.patch.set_alpha(0)
     st.pyplot(fig)
 
-# dropdown for the first symbolic graph
+# Layout and interaction in Streamlit
+st.markdown('<h1 class="center fadeIn header">Enhancing Your Stock Market Insights</h1>', unsafe_allow_html=True)
+
+st.markdown("""
+### Visualize Stock Metrics Over Time
+
+Illuminate the trajectory of **{metric.capitalize()}** through time with a canvas of clarity and insight. Our visual narratives empower your analytical journey, ensuring precision and informed decision-making.
+
+Explore dynamic charts that reveal patterns and trends, guiding strategic insights with every plotted data point.
+""")
+# Dropdown for selecting metric
 option = st.selectbox(
     'Select the metric to plot:',
     list(options_dict.keys())
@@ -73,10 +117,9 @@ option = st.selectbox(
 # Get the corresponding column name and color from the dictionary
 selected_metric, selected_color = options_dict[option]
 
-# Call the plotting function with the selected metric and color
-plot_stock_metric(stock, selected_metric, selected_color)
-
-
+# Button to trigger plot display
+if st.button('Plot Metric'):
+    plot_stock_metric(stock, selected_metric, selected_color)
 # Function to plot the selected metrics
 def versusGraph(df, x_metric, y_metric, color):
     # Scatter plot for custom metric comparison
@@ -94,8 +137,17 @@ def versusGraph(df, x_metric, y_metric, color):
     st.pyplot(fig)
 
 
+st.markdown('<h2 class="center fadeIn header">Set Your Matrices Straight</h2>', unsafe_allow_html=True)
 
-st.markdown("### Set your matrices Stright")
+st.markdown("""
+### Understanding Metric Comparisons in Stock Analysis
+
+Comparing metrics like closing price and volume in stock market analysis helps in **Relationship Analysis**, 
+**Pattern Recognition**, 
+**Risk Assessment**, 
+**Strategy Development**,
+**Visual Insight**.
+""")
 
 left, right = st.columns(2)
 
@@ -118,9 +170,6 @@ with right:
 
 # Call the plotting function with the selected metrics and color
 versusGraph(stock, x_metric, y_metric, selected_color)
-
-
-
 
 
 # Function to calculate SMA
@@ -150,7 +199,7 @@ moving_averages = {
     "EMA": ("Exponential Moving Average", "EMA tells us the weighted mean of the previous K data points.EMA places a greater weight and significance on the most recent data points.")
 }
 
-st.title('Moving Average Calculator')
+st.markdown('<h2 class="center fadeIn header">Moving Average Calculator</h2>', unsafe_allow_html=True)
 
 left , right = st.columns(2)
 
@@ -173,15 +222,56 @@ elif selected_ma_type == 'CMA':
 elif selected_ma_type == 'EMA':
     ma_df = calculate_EMA(stock, selected_metric)
 
-# Plotting
+# Plotting the Moving Averages
 if ma_df is not None:
-    st.subheader(f'{moving_averages[selected_ma_type][0]} for {selected_metric}')
+    st.markdown(f'#### {moving_averages[selected_ma_type][0]} for {selected_metric}')
     fig, ax = plt.subplots(figsize=(10, 6))  # Create a new figure and axis
-    ax.plot(ma_df.index, ma_df[selected_metric], label=selected_metric)
-    ax.plot(ma_df.index, ma_df[f'{selected_ma_type}30'], label=f'{moving_averages[selected_ma_type][0]} (30 days)')
-    ax.set_xlabel('Date')
-    ax.set_ylabel(selected_metric)
-    ax.legend()
+    ax.plot(ma_df.index, ma_df[selected_metric], label=selected_metric, color='#3DC2EC')
+    ax.plot(ma_df.index, ma_df[f'{selected_ma_type}30'], label=f'{moving_averages[selected_ma_type][0]} (30 days)', color='#FF204E')
+    ax.set_xlabel('Date', color='white')
+    ax.set_ylabel(selected_metric, color='white')
+    ax.spines['bottom'].set_color('white')
+    ax.spines['left'].set_color('white')
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+    legend = ax.legend(facecolor='black', edgecolor='white', loc='upper left')
+    for text in legend.get_texts():
+        text.set_color('white')
+    fig.patch.set_alpha(0)
+    ax.patch.set_alpha(0)
     st.pyplot(fig) 
 else:
     st.write("Select valid options to generate the plot.")
+
+
+
+
+stock['Weekly Return'] = stock['PREV. CLOSE'].pct_change()
+
+# Display plot in Streamlit
+st.markdown('<h2 class="center fadeIn header">Weekly Returns</h2>', unsafe_allow_html=True)
+
+st.markdown("""
+### Plotting The Weekly Returns
+
+Understand how **Weekly Returns** reflect market movements and investment performance. The insightful analysis provides a comprehensive perspective, guiding strategic decisions and maximizing returns.
+""")
+
+# Create a Matplotlib figure with specified size and styling
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(stock.index, stock['Weekly Return'], linestyle='--', marker='o', color='#3DC2EC', label='Weekly Return')
+ax.set_xlabel('Date', color='white')
+ax.set_ylabel('Weekly Return', color='white')
+ax.set_title('Weekly Return Plot', color='white')
+ax.tick_params(axis='x', colors='white')
+ax.tick_params(axis='y', colors='white')
+ax.spines['bottom'].set_color('white')
+ax.spines['left'].set_color('white')
+legend = ax.legend(facecolor='black', edgecolor='white', loc='upper left')
+for text in legend.get_texts():
+    text.set_color('white')
+fig.patch.set_alpha(0)
+ax.patch.set_alpha(0)
+
+# Display the plot within Streamlit
+st.pyplot(fig)
