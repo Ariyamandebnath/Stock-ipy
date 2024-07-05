@@ -43,10 +43,10 @@ stock.set_index('DATE', inplace=True)
 
 # Dictionary for dropdown options
 options_dict = {
-    'Closing Price': ('CLOSE', 'blue'),
-    'Volume Traded': ('VOLUME', 'green'),
-    'Highest Price': ('HIGH', 'red'),
-    'Last Traded Price': ('LTP', 'purple')
+    'Closing Price': ('CLOSE', '#96C9F4'),
+    'Volume Traded': ('VOLUME', '#9CDBA6'),
+    'Highest Price': ('HIGH', '#FF6969'),
+    'Last Traded Price': ('LTP', '#FFC7ED')
 }
 
 # Function to plot the selected metric
@@ -64,7 +64,7 @@ def plot_stock_metric(df, metric, color):
     ax.patch.set_alpha(0)
     st.pyplot(fig)
 
-# Streamlit dropdown menu
+# dropdown for the first symbolic graph
 option = st.selectbox(
     'Select the metric to plot:',
     list(options_dict.keys())
@@ -121,40 +121,67 @@ versusGraph(stock, x_metric, y_metric, selected_color)
 
 
 
-st.markdown("## Moving Averages ")
 
 
 # Function to calculate SMA
-def calculate_sma(df, column, period):
+def calculate_SMA(df, column):
     sma_df = df[column].to_frame()
-    sma_df[f'SMA{period}'] = df[column].rolling(period).mean()
+    sma_df['SMA30'] = df[column].rolling(30).mean()
     sma_df.dropna(inplace=True)
     return sma_df
 
-# Streamlit dropdown menus for selecting metrics
+def calculate_CMA(df, column):
+    cma_df = df[column].to_frame()
+    cma_df['CMA30'] = df[column].expanding().mean()
+    cma_df.dropna(inplace=True)
+    return cma_df
 
-# SMA period input
-sma_period = st.number_input('Select SMA period (leave empty for no SMA):', min_value=1, max_value=365, step=1, value=30)
+def calculate_EMA(df, column):
+    ema_df = df[f"{column}"].to_frame()
+    ema_df['EMA30'] = df[column].ewm(span=30).mean()
+    ema_df.dropna(inplace=True)
+    return ema_df
 
-# Get the corresponding column names and colors from the dictionary
-x_metric, _ = options_dict[x_option]
-y_metric, selected_color = options_dict[y_option]
+moving_averages = {
+    "SMA": ("Simple Moving Average", "A SMA tells us the unweighted mean of the previous K data points, The more the value of K the more smooth is the curve, but increasing K decreases accuracy. If the data points are p1,  p2, . . . , pn then we calculate the simple moving average."),
+    
+    "CMA": ("Cumulative Moving Average", "CMA is the mean of all the previous values up to the current value.CMA of dataPoints x1, x2 …..  at time t can be calculated as,the summation of all x's divided by time t."),
+    
+    "EMA": ("Exponential Moving Average", "EMA tells us the weighted mean of the previous K data points.EMA places a greater weight and significance on the most recent data points.")
+}
 
-# Plot the selected metrics
+st.title('Moving Average Calculator')
 
-# Calculate and plot SMA if specified
-if sma_period:
-    sma_df = calculate_sma(stock, y_metric, sma_period)
-    fig, ax = plt.subplots(figsize=(12, 4))
-    ax.plot(sma_df.index, sma_df[f'SMA{sma_period}'], color='orange', linestyle='--', label=f'SMA{sma_period}')
-    ax.set_xlabel("Date", color='white')
-    ax.set_ylabel(y_metric.capitalize(), color='white')
-    ax.set_title(f"SMA{sma_period} of {y_metric.capitalize()} Over Time", color='white')
+left , right = st.columns(2)
+
+with left:
+    selected_metric = st.selectbox('Select Metric:', ['CLOSE', 'VOLUME']) 
+
+with right:
+    selected_ma_type = st.selectbox('Select Moving Average Type:', list(moving_averages.keys()), format_func=lambda x: moving_averages[x][0])
+
+if selected_ma_type:
+    st.markdown(f"**{moving_averages[selected_ma_type][0]}**: {moving_averages[selected_ma_type][1]}")
+    
+    
+# Calculate selected moving average
+ma_df = None
+if selected_ma_type == 'SMA':
+    ma_df = calculate_SMA(stock, selected_metric)
+elif selected_ma_type == 'CMA':
+    ma_df = calculate_CMA(stock, selected_metric)
+elif selected_ma_type == 'EMA':
+    ma_df = calculate_EMA(stock, selected_metric)
+
+# Plotting
+if ma_df is not None:
+    st.subheader(f'{moving_averages[selected_ma_type][0]} for {selected_metric}')
+    fig, ax = plt.subplots(figsize=(10, 6))  # Create a new figure and axis
+    ax.plot(ma_df.index, ma_df[selected_metric], label=selected_metric)
+    ax.plot(ma_df.index, ma_df[f'{selected_ma_type}30'], label=f'{moving_averages[selected_ma_type][0]} (30 days)')
+    ax.set_xlabel('Date')
+    ax.set_ylabel(selected_metric)
     ax.legend()
-    ax.tick_params(axis='x', colors='white')
-    ax.tick_params(axis='y', colors='white')
-    ax.spines['bottom'].set_color('white')
-    ax.spines['left'].set_color('white')
-    fig.patch.set_alpha(0)
-    ax.patch.set_alpha(0)
-    st.pyplot(fig)
+    st.pyplot(fig) 
+else:
+    st.write("Select valid options to generate the plot.")
