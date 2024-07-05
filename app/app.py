@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import streamlit as st
 import sys
@@ -8,18 +7,56 @@ import plotly.express as px
 
 # Add the directory containing niftyScrape.py to the Python path
 sys.path.append(os.path.abspath("/home/ariyaman/learntocode/Stockipy/scraper"))
-import niftyScrape
-import helper
-from helper import delete_files_except_one
 
+import niftyScrape
+from helper import delete_files_except_one
 
 st.set_page_config(page_title="StockiPy", page_icon="🐍")
 
-
-
+# Custom CSS for styling and animations
 st.markdown(
     """
     <style>
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    @keyframes slideIn {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(0); }
+    }
+    .fadeIn {
+        animation: fadeIn 2s ease-in-out;
+    }
+    .slideIn {
+        animation: slideIn 1s ease-out;
+    }
+    .center {
+        text-align: center;
+    }
+    .header {
+        color: #06D001;
+        font-size: 48px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .subheader {
+        color: #8DECB4;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    .stButton button {
+        background-color: #ff4b4b;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .stButton button:hover {
+        background-color: #ff1a1a;
+    }
     .stSpinner > div > div {
         border-top-color: red;
         border-right-color: red;
@@ -33,7 +70,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 # Define the scraping function
 def scrapeData(starting_date, ending_date, stock):
@@ -50,9 +86,9 @@ def scrapeData(starting_date, ending_date, stock):
     
     return outputPath
 
-# Page title and description
-st.markdown('<h1 style="text-align: center;">StockiPy</h1>', unsafe_allow_html=True)
-st.markdown('<h3 style="text-align: center;">Stock Price Predictor</h3>', unsafe_allow_html=True)
+# Page title and description with animation and color
+st.markdown('<h1 class="center fadeIn header">StockiPy</h1>', unsafe_allow_html=True)
+st.markdown('<h3 class="center slideIn subheader">Stock Price Predictor</h3>', unsafe_allow_html=True)
 
 nifty_50_stocks = {
     "ADANIPORTS": "Adani Ports and Special Economic Zone Ltd",
@@ -102,7 +138,6 @@ nifty_50_stocks = {
     "WIPRO": "Wipro Ltd"
 }
 
-
 ml_models = {
     "LSTM": "Long Short-Term Memory",
     "GRU": "Gated Recurrent Unit",
@@ -125,7 +160,6 @@ with right:
 starting_date = st.date_input("Starting Date", date(2013, 1, 1))
 ending_date = st.date_input("Ending Date", date(2024, 6, 27))
 
-
 scrape = st.button("Scrape Data")
 
 if scrape:
@@ -138,10 +172,10 @@ if scrape:
     # Plot the data
     fig = px.line(data, x='DATE', y='CLOSE', title=f'{stockSymbol} Closing Prices')
     st.plotly_chart(fig)
+    
+    st.write("You Can Now move to the Analysis Page")
 
-
-#clean up
-folder_path ="../data"
-file_to_keep =f"historical_stock_data_{stockSymbol}.csv"
-
-delete_files_except_one(folder_path, file_to_keep)
+    # Clean up
+    folder_path = "../data"
+    file_to_keep = f"historical_stock_data_{stockSymbol}.csv"
+    delete_files_except_one(folder_path, file_to_keep)

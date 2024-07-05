@@ -27,8 +27,12 @@ def delete_files_except_one(folder_path, file_to_keep):
     except Exception as e:
         print(f"Error occurred: {e}")
 
-# Example usage:
-folder_path = '/path/to/your/folder'  # Replace with your folder path
-file_to_keep = 'important_file.txt'  # Replace with the file you want to keep
-
-delete_files_except_one(folder_path, file_to_keep)
+def get_only_file_path(directory):
+    # List all the files in the directory
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+    
+    # Check if there is exactly one file
+    if len(files) == 1:
+        return os.path.join(directory, files[0])
+    else:
+        raise Exception("There is not exactly one file in the directory.")
