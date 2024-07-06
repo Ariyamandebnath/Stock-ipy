@@ -276,7 +276,7 @@ def plot_weekly_returns_line():
 # Function to plot the histogram for Weekly Returns
 def plot_weekly_returns_histogram():
     fig, ax = plt.subplots(figsize=(10, 6))
-    sns.histplot(stock['Weekly Return'].dropna(), bins=100, color='', ax=ax)
+    sns.histplot(stock['Weekly Return'].dropna(), bins=100, color='red', ax=ax)
     ax.set_xlabel('Weekly Return', color='white')
     ax.set_ylabel('Frequency', color='white')
     ax.set_title('Distribution of Weekly Returns', color='white')
