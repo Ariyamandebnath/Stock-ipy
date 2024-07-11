@@ -13,6 +13,8 @@ from helper import delete_files_except_one
 
 st.set_page_config(page_title="StockiPy", page_icon="🐍")
 
+
+
 # Custom CSS for styling and animations
 st.markdown(
     """
@@ -138,10 +140,9 @@ nifty_50_stocks = {
     "WIPRO": "Wipro Ltd"
 }
 
-ml_models = {
-    "LSTM": "Long Short-Term Memory",
-    "GRU": "Gated Recurrent Unit",
-    "ARIMA": "Autoregressive Integrated Moving Average"
+stockExchange = {
+    "NSE": "National Stock Exchange",
+    "BSE": "Bombay Stock Exchange",
 }
 
 left, right = st.columns(2)
@@ -152,9 +153,9 @@ with left:
     st.write(f"You selected: {stockSymbol} - {companyName}")
 
 with right:
-    modelKey = st.selectbox("Select the Machine Learning model to implement", list(ml_models.keys()))
-    modelName = ml_models[modelKey]
-    st.write(f"You selected: {modelKey} - {modelName}")
+    exchangeKey = st.selectbox("Select Stock Exchange", list(stockExchange.keys()))
+    exchangeName = stockExchange[exchangeKey]
+    st.write(f"You selected: {exchangeKey} - {exchangeName}")
 
 # Date input widgets for starting and ending dates
 starting_date = st.date_input("Starting Date", date(2013, 1, 1))

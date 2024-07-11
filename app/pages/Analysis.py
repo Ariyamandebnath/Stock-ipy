@@ -105,7 +105,7 @@ st.markdown('<h1 class="center fadeIn header">Enhancing Your Stock Market Insigh
 st.markdown("""
 ### Visualize Stock Metrics Over Time
 
-Illuminate the trajectory of **{metric.capitalize()}** through time with a canvas of clarity and insight. Our visual narratives empower your analytical journey, ensuring precision and informed decision-making.
+Illuminate the trajectory of chosen matrics through time with a canvas of clarity and insight. Our visual narratives empower your analytical journey, ensuring precision and informed decision-making.
 
 Explore dynamic charts that reveal patterns and trends, guiding strategic insights with every plotted data point.
 """)
