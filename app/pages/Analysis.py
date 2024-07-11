@@ -15,7 +15,6 @@ st.set_page_config(page_title="Analysis", page_icon="🐍")
 st.markdown(
     """
     <style>
-    <style>
     .stApp {
         background-color: #0E1117;
         color: white;
@@ -31,17 +30,16 @@ st.markdown(
         color: white;
         text-align: center;
     }
-    .stMarkdown h1,.stMarkdown h2 {
+    .stMarkdown h1, .stMarkdown h2 {
         color: #DEF9C4 !important;
         text-align: center;
     }
-    
     .stMarkdown h3 {
         color: #50B498 !important;
         text-align: center;
     }
     .stTitle {
-        color: #DEF9C4;  /* Title color */
+        color: #DEF9C4;
         font-size: 48px;
         font-weight: bold;
         margin-bottom: 10px;
@@ -49,11 +47,11 @@ st.markdown(
     .stButton button {
         color: white !important;
         border-color: white !important;
-        background-color: #3DC2EC;  /* Button background color */
+        background-color: #3DC2EC;
         transition: all 0.3s ease;
     }
     .stButton button:hover {
-        background-color: #FF204E;  /* Button hover background color */
+        background-color: #FF204E;
     }
     .stButton button:active {
         transform: scale(0.95);
@@ -63,11 +61,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
-
-
 # Function to get the path of the only file in the directory
-directory_path = '/home/ariyaman/learntocode/Stockipy/data'
+directory_path = os.path.join('..', 'data')
 file_path = get_only_file_path(directory_path)
 
 # Read the stock data
@@ -83,7 +78,6 @@ options_dict = {
     'Last Traded Price': ('LTP', '#FFC7ED')
 }
 
-# Function to plot the selected metric
 # Function to plot the selected metric
 def plot_stock_metric(df, metric, color):
     fig, ax = plt.subplots(figsize=(12, 4))
@@ -105,10 +99,11 @@ st.markdown('<h1 class="center fadeIn header">Enhancing Your Stock Market Insigh
 st.markdown("""
 ### Visualize Stock Metrics Over Time
 
-Illuminate the trajectory of chosen matrics through time with a canvas of clarity and insight. Our visual narratives empower your analytical journey, ensuring precision and informed decision-making.
+Illuminate the trajectory of chosen metrics through time with a canvas of clarity and insight. Our visual narratives empower your analytical journey, ensuring precision and informed decision-making.
 
 Explore dynamic charts that reveal patterns and trends, guiding strategic insights with every plotted data point.
 """)
+
 # Dropdown for selecting metric
 option = st.selectbox(
     'Select the metric to plot:',
@@ -118,11 +113,10 @@ option = st.selectbox(
 # Get the corresponding column name and color from the dictionary
 selected_metric, selected_color = options_dict[option]
 
-
 plot_stock_metric(stock, selected_metric, selected_color)
+
 # Function to plot the selected metrics
 def versusGraph(df, x_metric, y_metric, color):
-    # Scatter plot for custom metric comparison
     fig, ax = plt.subplots(figsize=(12, 4))
     ax.scatter(df[x_metric], df[y_metric], color=color)
     ax.set_xlabel(x_metric.capitalize(), color='white')
@@ -135,7 +129,6 @@ def versusGraph(df, x_metric, y_metric, color):
     fig.patch.set_alpha(0)
     ax.patch.set_alpha(0)
     st.pyplot(fig)
-
 
 st.markdown('<h2 class="center fadeIn header">Set Your Matrices Straight</h2>', unsafe_allow_html=True)
 
@@ -153,24 +146,21 @@ left, right = st.columns(2)
 
 # Get the corresponding column names and colors from the dictionary
 with left:
-    # Streamlit dropdown menus for selecting metrics
     x_option = st.selectbox(
-    'Select the X-axis metric:',
-    list(options_dict.keys())
-)
+        'Select the X-axis metric:',
+        list(options_dict.keys())
+    )
     x_metric, _ = options_dict[x_option]
-    
 
 with right:
     y_option = st.selectbox(
-    'Select the Y-axis metric:',
-    list(options_dict.keys())
-)
+        'Select the Y-axis metric:',
+        list(options_dict.keys())
+    )
     y_metric, selected_color = options_dict[y_option]
 
 # Call the plotting function with the selected metrics and color
 versusGraph(stock, x_metric, y_metric, selected_color)
-
 
 # Function to calculate SMA
 def calculate_SMA(df, column):
@@ -186,33 +176,30 @@ def calculate_CMA(df, column):
     return cma_df
 
 def calculate_EMA(df, column):
-    ema_df = df[f"{column}"].to_frame()
+    ema_df = df[column].to_frame()
     ema_df['EMA30'] = df[column].ewm(span=30).mean()
     ema_df.dropna(inplace=True)
     return ema_df
 
 moving_averages = {
-    "SMA": ("Simple Moving Average", "A SMA tells us the unweighted mean of the previous K data points, The more the value of K the more smooth is the curve, but increasing K decreases accuracy. If the data points are p1,  p2, . . . , pn then we calculate the simple moving average."),
-    
-    "CMA": ("Cumulative Moving Average", "CMA is the mean of all the previous values up to the current value.CMA of dataPoints x1, x2 …..  at time t can be calculated as,the summation of all x's divided by time t."),
-    
-    "EMA": ("Exponential Moving Average", "EMA tells us the weighted mean of the previous K data points.EMA places a greater weight and significance on the most recent data points.")
+    "SMA": ("Simple Moving Average", "A SMA tells us the unweighted mean of the previous K data points. The more the value of K, the smoother the curve, but increasing K decreases accuracy. If the data points are p1, p2, . . . , pn, then we calculate the simple moving average."),
+    "CMA": ("Cumulative Moving Average", "CMA is the mean of all the previous values up to the current value. CMA of data points x1, x2, ….. at time t can be calculated as the summation of all x's divided by time t."),
+    "EMA": ("Exponential Moving Average", "EMA tells us the weighted mean of the previous K data points. EMA places a greater weight and significance on the most recent data points.")
 }
 
 st.markdown('<h2 class="center fadeIn header">Moving Average Calculator</h2>', unsafe_allow_html=True)
 
-left , right = st.columns(2)
+left, right = st.columns(2)
 
 with left:
-    selected_metric = st.selectbox('Select Metric:', ['CLOSE', 'VOLUME']) 
+    selected_metric = st.selectbox('Select Metric:', ['CLOSE', 'VOLUME'])
 
 with right:
     selected_ma_type = st.selectbox('Select Moving Average Type:', list(moving_averages.keys()), format_func=lambda x: moving_averages[x][0])
 
 if selected_ma_type:
     st.markdown(f"**{moving_averages[selected_ma_type][0]}**: {moving_averages[selected_ma_type][1]}")
-    
-    
+
 # Calculate selected moving average
 ma_df = None
 if selected_ma_type == 'SMA':
@@ -225,7 +212,7 @@ elif selected_ma_type == 'EMA':
 # Plotting the Moving Averages
 if ma_df is not None:
     st.markdown(f'#### {moving_averages[selected_ma_type][0]} for {selected_metric}')
-    fig, ax = plt.subplots(figsize=(10, 6))  # Create a new figure and axis
+    fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(ma_df.index, ma_df[selected_metric], label=selected_metric, color='#3DC2EC')
     ax.plot(ma_df.index, ma_df[f'{selected_ma_type}30'], label=f'{moving_averages[selected_ma_type][0]} (30 days)', color='#FF204E')
     ax.set_xlabel('Date', color='white')
@@ -239,12 +226,9 @@ if ma_df is not None:
         text.set_color('white')
     fig.patch.set_alpha(0)
     ax.patch.set_alpha(0)
-    st.pyplot(fig) 
+    st.pyplot(fig)
 else:
     st.write("Select valid options to generate the plot.")
-
-
-
 
 stock['Weekly Return'] = stock['PREV. CLOSE'].pct_change()
 
@@ -256,6 +240,7 @@ st.markdown("""
 
 Understand how **Weekly Returns** reflect market movements and investment performance. The insightful analysis provides a comprehensive perspective, guiding strategic decisions and maximizing returns.
 """)
+
 def plot_weekly_returns_line():
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(stock.index, stock['Weekly Return'], linestyle='--', marker='o', color='#3DC2EC', label='Weekly Return')
@@ -288,8 +273,6 @@ def plot_weekly_returns_histogram():
     ax.patch.set_alpha(0)
     st.pyplot(fig)
 
-
-
 # Option to select plot type
 plot_type = st.selectbox("Select plot type:", ("Weekly Return line plot", "Histogram of Average weekly Return"))
 
@@ -302,5 +285,3 @@ elif plot_type == "Histogram of Average weekly Return":
     st.markdown("### Distribution of Weekly Returns")
     st.markdown("Shows the distribution of average weekly returns.")
     plot_weekly_returns_histogram()
-    
-    

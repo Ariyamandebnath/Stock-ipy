@@ -6,7 +6,7 @@ from datetime import datetime, date
 import plotly.express as px
 
 # Add the directory containing niftyScrape.py to the Python path
-sys.path.append(os.path.abspath("/home/ariyaman/learntocode/Stockipy/scraper"))
+sys.path.append(os.path.abspath("scraper"))
 
 import niftyScrape
 from helper import delete_files_except_one

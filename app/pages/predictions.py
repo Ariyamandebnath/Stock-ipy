@@ -191,16 +191,16 @@ def common_prediction(stockData, model_path, model_type, scaler, window_size=60,
     plt.legend(['Actual Test Data', 'Predicted Test Data', 'Future Predictions'], loc='upper left', prop={'size': 15})
     plt.grid(color='white')
     st.pyplot(plt)
-    
-    
+
+
 def ARIMA(stockData):
     df2 = stockData.set_index('DATE')
     data = list(df2["CLOSE"])
     x_train = data[:-100]
     x_test = data[-100:]
-    
+
     # Load the ARIMA model from pickle file
-    pickle_file_path = "/home/ariyaman/learntocode/Stockipy/models/ARIMA/HDFC_ARIMA.pkl"  # Adjust this path
+    pickle_file_path = "../models/ARIMA/HDFC_ARIMA.pkl"  # Adjust this path
     with open(pickle_file_path, 'rb') as f:
         model = pickle.load(f)
 
@@ -208,7 +208,7 @@ def ARIMA(stockData):
     start = len(x_train)
     end = len(x_train) + len(x_test) - 1
     pred = model.predict(start=start, end=end)
-    
+
     # Prepare the predicted series
     s = pd.Series(pred, index=df2.index[-100:])
 
@@ -234,15 +234,13 @@ def ARIMA(stockData):
     # Display metrics in Streamlit
     st.write("Test MAPE:", MAPE)
     st.write("Test Accuracy:", Accuracy)
-    
-    
-    
-    pred_future = model.predict(start=end,end=end+10)
-    
+
+    pred_future = model.predict(start=end, end=end + 10)
+
 
 def main():
     # Load data
-    directory_path = '/home/ariyaman/learntocode/Stockipy/data'
+    directory_path = '../data'
     file_path = get_only_file_path(directory_path)
     stockData = pd.read_csv(file_path)
     stockData['DATE'] = pd.to_datetime(stockData['DATE'])
@@ -279,9 +277,9 @@ def main():
 
     # Define model paths
     model_paths = {
-        "LSTM": "/home/ariyaman/learntocode/Stockipy/models/LSTM/StockPredictionModel_AXIS.keras",
-        "GRU": "/home/ariyaman/learntocode/Stockipy/models/GRU/AXIS_Model_GRU.keras",
-        "ARIMA": "/home/ariyaman/learntocode/Stockipy/models/ARIMA/arima.pkl"
+        "LSTM": "../models/LSTM/StockPredictionModel_AXIS.keras",
+        "GRU": "../models/GRU/AXIS_Model_GRU.keras",
+        "ARIMA": "../models/ARIMA/arima.pkl"
     }
 
     # Perform predictions based on selected model
@@ -292,6 +290,7 @@ def main():
             common_prediction(stockData, model_paths[selected_model_key], selected_model_key, scaler)
         elif selected_model_key == "ARIMA":
             ARIMA(stockData)
+
 
 if __name__ == '__main__':
     main()
