@@ -2,13 +2,15 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from keras.models import load_model
+import pickle
 import os
 import sys
 import plotly.express as px
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_percentage_error
+from statsmodels.tsa.arima.model import ARIMA
+from pmdarima import auto_arima
 
 # Add path to the helper module
 sys.path.append(os.path.abspath("../app.py"))
@@ -98,23 +100,18 @@ def display_model_selection(ml_model):
         return modelKey, modelName
     return None, None
 
-# Define LSTM model prediction function
-def LSTM(stockData):
+
+def common_prediction(stockData, model_path, model_type, scaler, window_size=60, prediction_days=30):
     test_size = stockData[stockData.DATE.dt.year == 2023].shape[0]
 
-    scaler = MinMaxScaler()
-    scaler.fit(stockData.CLOSE.values.reshape(-1, 1))
-
-    window_size = 60
-
-    test_data = stockData.CLOSE[-test_size - 60:]
+    test_data = stockData.CLOSE[-test_size - window_size:]
     test_data = scaler.transform(test_data.values.reshape(-1, 1))
 
     X_test = []
     y_test = []
 
     for i in range(window_size, len(test_data)):
-        X_test.append(test_data[i - 60:i, 0])
+        X_test.append(test_data[i - window_size:i, 0])
         y_test.append(test_data[i, 0])
 
     X_test = np.array(X_test)
@@ -122,71 +119,65 @@ def LSTM(stockData):
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
     y_test = np.reshape(y_test, (-1, 1))
 
-    model_path = os.path.abspath("/home/ariyaman/learntocode/Stockipy/models/LSTM/StockPredictionModel.keras")
+    if model_type in ['LSTM', 'GRU']:
+        path = os.path.abspath(model_path)
 
-    # Load the model
-    model = load_model(model_path)
+        model = load_model(path)
+        result = model.evaluate(X_test, y_test)
+        y_pred = model.predict(X_test)
+    elif model_type == 'ARIMA':
+        with open(model_path, 'rb') as f:
+            model = pickle.load(f)
+        y_pred = model.forecast(steps=len(y_test))[0]
+        y_pred = y_pred.reshape(-1, 1)
 
-    # Evaluate the model
-    result = model.evaluate(X_test, y_test)
-    y_pred = model.predict(X_test)
     MAPE = mean_absolute_percentage_error(y_test, y_pred)
     Accuracy = 1 - MAPE
 
-    # Display the results using Streamlit
-    st.write("Test Loss:", result)
     st.write("Test MAPE:", MAPE)
     st.write("Test Accuracy:", Accuracy)
 
-    # Inverse transform to get the actual prices
     y_test_true = scaler.inverse_transform(y_test)
     y_test_pred = scaler.inverse_transform(y_pred)
 
-    # Plot the results
     plt.figure(figsize=(15, 6), dpi=150)
     plt.rcParams['axes.facecolor'] = 'orange'
     plt.rc('axes', edgecolor='white')
 
-    # Assuming 'DATE' is the column name in stockData and test_size is defined
     plt.plot(stockData['DATE'].iloc[-len(y_test_true):], y_test_true, color='blue', lw=2)
     plt.plot(stockData['DATE'].iloc[-len(y_test_true):], y_test_pred, color='red', lw=2)
-    plt.title('Model Performance on AXIS Stock Price Prediction', fontsize=15)
+    plt.title(f'Model Performance on {stockData["SYMBOL"].iloc[0]} Stock Price Prediction', fontsize=15)
     plt.xlabel('Date', fontsize=12)
     plt.ylabel('Price', fontsize=12)
     plt.legend(['Actual Test Data', 'Predicted Test Data'], loc='upper left', prop={'size': 15})
     plt.grid(color='white')
-
-    # Display the plot in Streamlit
     st.pyplot(plt)
 
-    # Add a dropdown menu for the user to select the prediction period
-    prediction_days = 30
-
-    # Generate future predictions
-    last_sequence = X_test[-1:]  # Get the last sequence from the test set
+    last_sequence = X_test[-1:] if model_type in ['LSTM', 'GRU'] else stockData.CLOSE[-window_size:].values.reshape(-1, 1)
     future_predictions = []
 
     for _ in range(prediction_days):
-        next_pred = model.predict(last_sequence)
-        future_predictions.append(next_pred)
-        last_sequence = np.append(last_sequence[:, 1:, :], next_pred[:, np.newaxis, :], axis=1)
+        if model_type in ['LSTM', 'GRU']:
+            next_pred = model.predict(last_sequence)
+            future_predictions.append(next_pred)
+            last_sequence = np.append(last_sequence[:, 1:, :], next_pred[:, np.newaxis, :], axis=1)
+        elif model_type == 'ARIMA':
+            next_pred = model.forecast(steps=1)[0]
+            future_predictions.append(next_pred)
+            last_sequence = np.append(last_sequence[1:], next_pred.reshape(-1, 1), axis=0)
 
-    # Inverse transform to get the actual future prices
     future_predictions = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
 
-    # Generate future dates
     last_date = pd.to_datetime(stockData['DATE'].iloc[-1])
     future_dates = [last_date + pd.Timedelta(days=i) for i in range(1, prediction_days + 1)]
 
-    # Create a DataFrame for future predictions
     future_predictions_df = pd.DataFrame({
         'Date': future_dates,
         'Predicted Price': future_predictions.flatten()
     })
 
-    st.write("Closing Price for next 30 days",future_predictions_df)
+    st.write(f"Closing Price for next {prediction_days} days", future_predictions_df)
 
-    # Plot future predictions
     plt.figure(figsize=(15, 6), dpi=150)
     plt.rcParams['axes.facecolor'] = 'orange'
     plt.rc('axes', edgecolor='white')
@@ -194,33 +185,71 @@ def LSTM(stockData):
     plt.plot(stockData['DATE'].iloc[-len(y_test_true):], y_test_true, color='blue', lw=2)
     plt.plot(stockData['DATE'].iloc[-len(y_test_true):], y_test_pred, color='red', lw=2)
     plt.plot(future_dates, future_predictions, color='green', lw=2, linestyle='dashed')
-    plt.title('Model Performance and Future Predictions on AXIS Stock Price', fontsize=15)
+    plt.title(f'Model Performance and Future Predictions on {stockData["SYMBOL"].iloc[0]} Stock Price', fontsize=15)
     plt.xlabel('Date', fontsize=12)
     plt.ylabel('Price', fontsize=12)
     plt.legend(['Actual Test Data', 'Predicted Test Data', 'Future Predictions'], loc='upper left', prop={'size': 15})
     plt.grid(color='white')
+    st.pyplot(plt)
+    
+    
+def ARIMA(stockData):
+    df2 = stockData.set_index('DATE')
+    data = list(df2["CLOSE"])
+    x_train = data[:-100]
+    x_test = data[-100:]
+    
+    # Load the ARIMA model from pickle file
+    pickle_file_path = "/home/ariyaman/learntocode/Stockipy/models/ARIMA/HDFC_ARIMA.pkl"  # Adjust this path
+    with open(pickle_file_path, 'rb') as f:
+        model = pickle.load(f)
 
-    # Display the future predictions plot in Streamlit
+    # Make predictions
+    start = len(x_train)
+    end = len(x_train) + len(x_test) - 1
+    pred = model.predict(start=start, end=end)
+    
+    # Prepare the predicted series
+    s = pd.Series(pred, index=df2.index[-100:])
+
+    # Plot actual vs predicted
+    plt.figure(figsize=(10, 6), dpi=100)
+    df2['CLOSE'][-100:].plot(label='Actual Stock Price', legend=True)
+    s.plot(label='Predicted Price', legend=True)
+    plt.title(f'Model Performance on {stockData["SYMBOL"].iloc[0]} Stock Price Prediction (ARIMA)', fontsize=15)
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Price', fontsize=12)
+    plt.legend(prop={'size': 15})
+    plt.grid(color='white')
+
+    # Display the plot in Streamlit
     st.pyplot(plt)
 
+    # Calculate metrics (MAPE and Accuracy)
+    y_test = df2['CLOSE'][-100:].values  # Ensure y_test is 1-dimensional
+    y_test_pred = s.values  # Ensure y_test_pred is 1-dimensional
+    MAPE = mean_absolute_percentage_error(y_test, y_test_pred)
+    Accuracy = 1 - MAPE
 
-def GRU(stockData):
-    return
-
-
+    # Display metrics in Streamlit
+    st.write("Test MAPE:", MAPE)
+    st.write("Test Accuracy:", Accuracy)
+    
+    
+    
+    pred_future = model.predict(start=end,end=end+10)
+    
 
 def main():
-    # Bring data of the previously loaded stock from the local storage for prediction
+    # Load data
     directory_path = '/home/ariyaman/learntocode/Stockipy/data'
     file_path = get_only_file_path(directory_path)
-
-    # Read the stock data
     stockData = pd.read_csv(file_path)
     stockData['DATE'] = pd.to_datetime(stockData['DATE'])
     stockData.sort_values(by='DATE', ascending=True, inplace=True)
     stockData.reset_index(drop=True, inplace=True)
 
-    # Page heading and introduction
+    # Display introductory content
     st.markdown('<h1 class="stTitle">Stock Market Forecasting Insights</h1>', unsafe_allow_html=True)
     st.markdown("""
     ### Predict Stock Prices with Machine Learning Models
@@ -229,17 +258,7 @@ def main():
     Explore and compare different models to uncover insights that drive your investment strategies forward.
     """)
 
-    # Define machine learning models
-    ml_model = {
-        "LSTM": "Long Short-Term Memory",
-        "GRU": "Gated Recurrent Unit",
-        "ARIMA": "AutoRegressive Integrated Moving Average"
-    }
-
-    # Display model selection and get the selected model key
-    selected_model_key, selected_model_name = display_model_selection(ml_model)
-
-    # Plot stock price history
+    # Display historical price plot
     fig = px.line(stockData, x='DATE', y='CLOSE')
     fig.update_traces(line_color='black')
     fig.update_layout(
@@ -250,13 +269,29 @@ def main():
     )
     st.plotly_chart(fig)
 
-    # Call the selected model function
-    if selected_model_key == "LSTM":
-        LSTM(stockData)
-    elif selected_model_key == "GRU":
-        st.write("GRU model prediction function is not yet implemented.")
-    elif selected_model_key == "ARIMA":
-        st.write("ARIMA model prediction function is not yet implemented.")
+    # Model selection and prediction
+    ml_model = {
+        "LSTM": "Long Short-Term Memory",
+        "GRU": "Gated Recurrent Unit",
+        "ARIMA": "AutoRegressive Integrated Moving Average"
+    }
+    selected_model_key, selected_model_name = display_model_selection(ml_model)
 
-if __name__ == "__main__":
+    # Define model paths
+    model_paths = {
+        "LSTM": "/home/ariyaman/learntocode/Stockipy/models/LSTM/StockPredictionModel_AXIS.keras",
+        "GRU": "/home/ariyaman/learntocode/Stockipy/models/GRU/AXIS_Model_GRU.keras",
+        "ARIMA": "/home/ariyaman/learntocode/Stockipy/models/ARIMA/arima.pkl"
+    }
+
+    # Perform predictions based on selected model
+    if selected_model_key:
+        if selected_model_key in ["LSTM", "GRU"]:
+            scaler = MinMaxScaler()
+            scaler.fit(stockData.CLOSE.values.reshape(-1, 1))
+            common_prediction(stockData, model_paths[selected_model_key], selected_model_key, scaler)
+        elif selected_model_key == "ARIMA":
+            ARIMA(stockData)
+
+if __name__ == '__main__':
     main()
