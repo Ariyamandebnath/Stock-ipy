@@ -26,7 +26,7 @@ Stockipy is a comprehensive project designed to scrape stock data, perform explo
 
 Watch the demo video below to see Stockipy in action:
 
-[![Stockipy Video Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID_HERE)
+[![Stockipy Video Demo](https://youtu.be/jfC057kEOPE?si=sljZOVvXa5PUiR5e)
 
 
 ## Installation
