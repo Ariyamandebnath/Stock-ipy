@@ -20,12 +20,21 @@ Stockipy is a comprehensive project designed to scrape stock data, perform explo
 - **Model Comparison:** Compare the accuracy and losses of each model.
 - **Streamlit Application:** Interactive multipage Streamlit app to present data and predictions.
 
+
+
+## Video Demo
+
+Watch the demo video below to see Stockipy in action:
+
+[![Stockipy Video Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID_HERE)
+
+
 ## Installation
 
 1. **Clone the repository:**
 
     ```sh
-    git clone https://github.com/yourusername/stockipy.git
+    git clone https://github.com/Ariyamandebnath/Stock-ipy
     cd stockipy
     ```
 
@@ -43,33 +52,20 @@ Stockipy is a comprehensive project designed to scrape stock data, perform explo
     ```
 
 ## Usage
-
-1. **Run the scraper to collect stock data:**
-
+1. **Locate to app folder:**
     ```sh
-    python scraper.py
+    cd app
     ```
 
-2. **Perform exploratory data analysis:**
 
-    ```sh
-    python eda.py
-    ```
-
-3. **Train and evaluate machine learning models:**
-
-    ```sh
-    python train_models.py
-    ```
-
-4. **Run the Streamlit application:**
+2. **Run the Streamlit application:**
 
     ```sh
     streamlit run app.py
     ```
 
 ## Project Structure
-
+```
 Stockipy/
 ├── analysis/
 │ └── EDA.ipynb
@@ -104,7 +100,7 @@ Stockipy/
 ├── .gitignore
 ├── requirements.txt
 └── README.md
-
+```
 
 ## Modules
 
