@@ -1,3 +1,5 @@
+
+https://github.com/user-attachments/assets/37727060-e560-44f6-bde2-7a90ab65901b
 # Stockipy
 
 Stockipy is a comprehensive project designed to scrape stock data, perform exploratory data analysis (EDA), and implement multiple machine learning models to predict stock closing prices. The project includes an LSTM, GRU, and ARIMA model to compare the accuracy and losses of each. The results are presented through a multipage Streamlit application.
@@ -26,7 +28,8 @@ Stockipy is a comprehensive project designed to scrape stock data, perform explo
 
 Watch the demo video below to see Stockipy in action:
 
-[![Stockipy Video Demo](https://youtu.be/jfC057kEOPE?si=sljZOVvXa5PUiR5e)
+https://github.com/user-attachments/assets/d01286b0-05a3-435a-9b06-ae7ca57eee66
+
 
 
 ## Installation
